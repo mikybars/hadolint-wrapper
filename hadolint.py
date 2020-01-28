@@ -1,8 +1,8 @@
-import argparse
 import json
 import subprocess
 import sys
 from typing import List, Any
+import click
 
 FORE_RED = '\033[1;31m'
 FORE_YELLOW = '\033[1;33m'
@@ -39,26 +39,25 @@ def print_errors_if_any(lineno):
         print(style_error(e))
 
 
-def main():
+@click.command(context_settings=dict(
+    ignore_unknown_options=True,
+))
+@click.argument('Dockerfile', type=click.File())
+@click.option('--use-docker', '-d', is_flag=True, help='use the dockerized version of hadolint')
+@click.option('--config', '-c', help="path to the hadolint configuration file")
+@click.option('--color', type=click.Choice(['never', 'auto', 'always']), default='auto')
+def main(dockerfile, use_docker, config, color):
+    """
+    Provides a more clear output for hadolint
+    """
     global color_setting, parsed_errors
-
-    # Setup command line arg parser
-    parser = argparse.ArgumentParser(description='Provides a more clear output for hadolint')
-    parser.add_argument("Dockerfile")
-    parser.add_argument('-c', '--config', metavar='FILENAME', help="Path to the hadolint configuration file")
-    parser.add_argument("--docker", help="use the dockerized version of hadolint",
-                        action="store_true")
-    parser.add_argument("--color", choices=['never', 'auto', 'always'], default='auto')
-
-    args = parser.parse_args()
-    color_setting = args.color
+    color_setting = color
 
     try:
-        input_ = open(args.Dockerfile) if args.Dockerfile != '-' else sys.stdin
-        lines = [line.rstrip('\n') for line in input_]
+        lines = [line.rstrip('\n') for line in dockerfile]
 
-        hadolint_args = ["-c", args.config] if args.config else []
-        cmd = ["docker", "run", "--rm", "-i", "hadolint/hadolint"] if args.docker else []
+        hadolint_args = ["-c", config] if config else []
+        cmd = ["docker", "run", "--rm", "-i", "hadolint/hadolint"] if use_docker else []
         cmd.extend(["hadolint"] + hadolint_args + ["-f", "json", "-"])
 
         process = subprocess.run(cmd, input='\n'.join(lines).encode(), capture_output=True)
