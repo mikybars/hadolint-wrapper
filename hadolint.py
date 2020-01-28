@@ -54,16 +54,17 @@ def main(dockerfile, use_docker, color, hadolint_args):
     color_setting = color
 
     try:
-        lines = [line.rstrip('\n') for line in dockerfile]
+        input_lines = dockerfile.read().splitlines()
 
         cmd = ["hadolint", "--format", "json", "-"] + list(hadolint_args)
         if use_docker:
             cmd = ["docker", "run", "--rm", "-i", "hadolint/hadolint"] + cmd
 
-        process = subprocess.run(cmd, input='\n'.join(lines).encode(), capture_output=True)
+        input_bytes = '\n'.join(input_lines).encode()
+        process = subprocess.run(cmd, input=input_bytes, capture_output=True)
         parsed_errors = json.loads(process.stdout)
         if len(parsed_errors) > 0:
-            for n, line in enumerate(lines, start=1):
+            for n, line in enumerate(input_lines, start=1):
                 print_errors_if_any(n)
                 print(line)
 
