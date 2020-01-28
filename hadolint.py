@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+from json import JSONDecodeError
 from typing import List, Any
 import click
 
@@ -62,18 +63,23 @@ def main(dockerfile, use_docker, color, hadolint_args):
 
         input_bytes = '\n'.join(input_lines).encode()
         process = subprocess.run(cmd, input=input_bytes, capture_output=True)
-        parsed_errors = json.loads(process.stdout)
-        if len(parsed_errors) > 0:
-            for n, line in enumerate(input_lines, start=1):
-                print_errors_if_any(n)
-                print(line)
+
+        if len(process.stderr) > 0:
+            print(process.stderr.decode(), file=sys.stderr)
+
+        if len(process.stdout) > 0:
+            parsed_errors = json.loads(process.stdout)
+            if len(parsed_errors) > 0:
+                for n, line in enumerate(input_lines, start=1):
+                    print_errors_if_any(n)
+                    print(line)
 
         sys.exit(process.returncode)
-    except IOError as err:
-        print(err)
+    except FileNotFoundError:
+        print("hadolint: binary not found in $PATH", file=sys.stderr)
         sys.exit(10)
-    except ValueError:
-        print("Error: Bad output from hadolint")
+    except JSONDecodeError:
+        print("hadolint: bad output!", file=sys.stderr)
         sys.exit(20)
 
 
