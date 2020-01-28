@@ -44,9 +44,9 @@ def print_errors_if_any(lineno):
 ))
 @click.argument('Dockerfile', type=click.File())
 @click.option('--use-docker', '-d', is_flag=True, help='use the dockerized version of hadolint')
-@click.option('--config', '-c', help="path to the hadolint configuration file")
 @click.option('--color', type=click.Choice(['never', 'auto', 'always']), default='auto')
-def main(dockerfile, use_docker, config, color):
+@click.argument('hadolint_args', nargs=-1, type=click.UNPROCESSED)
+def main(dockerfile, use_docker, color, hadolint_args):
     """
     Provides a more clear output for hadolint
     """
@@ -56,9 +56,9 @@ def main(dockerfile, use_docker, config, color):
     try:
         lines = [line.rstrip('\n') for line in dockerfile]
 
-        hadolint_args = ["-c", config] if config else []
-        cmd = ["docker", "run", "--rm", "-i", "hadolint/hadolint"] if use_docker else []
-        cmd.extend(["hadolint"] + hadolint_args + ["-f", "json", "-"])
+        cmd = ["hadolint", "--format", "json", "-"] + list(hadolint_args)
+        if use_docker:
+            cmd = ["docker", "run", "--rm", "-i", "hadolint/hadolint"] + cmd
 
         process = subprocess.run(cmd, input='\n'.join(lines).encode(), capture_output=True)
         parsed_errors = json.loads(process.stdout)
