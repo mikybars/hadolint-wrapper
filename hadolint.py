@@ -1,64 +1,73 @@
-import os,sys
-import subprocess
-import json
 import argparse
+import json
+import subprocess
+import sys
+from typing import List, Any
 
-parsed_errors = []
-color = 'auto'
+FORE_RED = '\033[1;31m'
+FORE_YELLOW = '\033[1;33m'
+RESET_COLOR = '\033[m'
 
-fore_red = '\033[1;31m'
-fore_yellow = '\033[1;33m'
-color_reset = '\033[m'
+parsed_errors: List[Any]
+color_setting: str
 
-def print_error(err):
-    error_line = '{}: {}'.format(err['code'], err['message'])
-    if color == 'always' or color == 'auto' and sys.stdout.isatty():
-        prefix = fore_red if err['level'] == 'error' else fore_yellow
-        suffix = color_reset
+
+def should_use_colors():
+    return color_setting == 'always' or color_setting == 'auto' and sys.stdout.isatty()
+
+
+def style_error(e):
+    error_msg = f'{e["code"]}: {e["message"]}'
+    if should_use_colors():
+        prefix = {
+            'error': FORE_RED,
+            'warning': FORE_YELLOW,
+        }.get(e['level'], FORE_RED)
+        suffix = RESET_COLOR
     else:
-        prefix = '[x] ' if err['level'] == 'error' else '[!] '
+        prefix = {
+            'error': '[x] ',
+            'warning': '[!] ',
+        }.get(e['level'], '[x] ')
         suffix = ''
-    print('{}{}{}'.format(prefix, error_line, suffix))
+    return f'{prefix}{error_msg}{suffix}'
 
-def print_input_line_with_errors((i, line)):
-    map(print_error, filter(lambda err: err['line'] == i+1, parsed_errors))
-    print(line)
+
+def print_errors_if_any(lineno):
+    line_errors = [e for e in parsed_errors if e['line'] == lineno]
+    for e in line_errors:
+        print(style_error(e))
+
 
 def main():
-    global color
+    global color_setting, parsed_errors
 
     # Setup command line arg parser
     parser = argparse.ArgumentParser(description='Provides a more clear output for hadolint')
     parser.add_argument("Dockerfile")
     parser.add_argument('-c', '--config', metavar='FILENAME', help="Path to the hadolint configuration file")
     parser.add_argument("--docker", help="use the dockerized version of hadolint",
-    action="store_true")
+                        action="store_true")
     parser.add_argument("--color", choices=['never', 'auto', 'always'], default='auto')
 
     args = parser.parse_args()
-    color = args.color
+    color_setting = args.color
 
     try:
-        # Read input
         input_ = open(args.Dockerfile) if args.Dockerfile != '-' else sys.stdin
         lines = [line.rstrip('\n') for line in input_]
 
-        # Build command line
         hadolint_args = ["-c", args.config] if args.config else []
         cmd = ["docker", "run", "--rm", "-i", "hadolint/hadolint"] if args.docker else []
         cmd.extend(["hadolint"] + hadolint_args + ["-f", "json", "-"])
 
-        # Exec hadolint and grab the output
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        hadolint_report = process.communicate('\n'.join(lines))[0]
-
-        # Parse errors and merge them with input lines
-        global parsed_errors
-        parsed_errors = json.loads(hadolint_report)
+        process = subprocess.run(cmd, input='\n'.join(lines).encode(), capture_output=True)
+        parsed_errors = json.loads(process.stdout)
         if len(parsed_errors) > 0:
-            map(print_input_line_with_errors, enumerate(lines))
+            for n, line in enumerate(lines, start=1):
+                print_errors_if_any(n)
+                print(line)
 
-        # Exit with the exit code of hadolint!
         sys.exit(process.returncode)
     except IOError as err:
         print(err)
@@ -66,6 +75,7 @@ def main():
     except ValueError:
         print("Error: Bad output from hadolint")
         sys.exit(20)
+
 
 if __name__ == '__main__':
     main()
