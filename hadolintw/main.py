@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+"""
+    hadolintw
+
+    Pretty output for hadolint
+"""
+
 import json
 import subprocess
 import sys
@@ -49,7 +57,7 @@ def print_errors_if_any(lineno):
 @click.argument('hadolint_args', nargs=-1, type=click.UNPROCESSED)
 def main(dockerfile, use_docker, color, hadolint_args):
     """
-    Provides a more clear output for hadolint
+    Pretty output for hadolint
     """
     global color_setting, parsed_errors
     color_setting = color
