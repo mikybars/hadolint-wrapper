@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hadolintw"
-version = "1.1.0"
+version = "1.2.0"
 description = "Pretty output for hadolint"
 authors = ["mperezi <mperezibars@gmail.com>"]
 license = "MIT"

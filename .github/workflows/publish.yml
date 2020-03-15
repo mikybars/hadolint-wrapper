@@ -1,0 +1,60 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          pip install -r scripts/requirements.txt
+
+      - name: Build package
+        id: build_package
+        run: |
+          poetry build
+          echo "::set-output name=file::$(ls dist/*.tar.gz)"
+
+      - name: Publish to PyPI
+        run: poetry publish --username ${{ secrets.PYPI_USER }} --password ${{ secrets.PYPI_PASS }}
+
+      - name: Build brew package
+        id: build_brew_package
+        run: |
+          scripts/create_brew_package.py ${{ steps.build_package.outputs.file }}
+          echo "::set-output name=file::$(ls dist/*-brew.tar.gz)"
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.build_brew_package.outputs.file }}
+          asset_name: ${{ steps.build_brew_package.outputs.file }}
+          asset_content_type: application/gzip
