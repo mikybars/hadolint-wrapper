@@ -1,0 +1,43 @@
+name: Publish
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          pip install -r scripts/requirements.txt
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to PyPI
+        run: poetry publish --username ${{ secrets.PYPI_USER }} --password ${{ secrets.PYPI_PASS }}
+
+      - name: Get release version
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+
+      - name: Create brew package
+        run: scripts/create_brew_package.py $(ls dist/*.tar.gz)
+
+      - name: Upload release ${{ env.RELEASE_VERSION }} asset
+        run: scripts/upload_github_release_asset.sh
+            ${{ github.repository }}
+            $RELEASE_VERSION
+            $(ls dist/*-brew.tar.gz)
+            ${{ github.token }}
