@@ -1,4 +1,5 @@
-# hadolint-wrapper
+[![Publish](https://github.com/mperezi/hadolint-wrapper/workflows/Publish/badge.svg)](https://github.com/mperezi/hadolint-wrapper/actions?query=workflow%3APublish)
+# hadolint-wrapper 
 
 ## What is hadolint?
 
@@ -45,6 +46,15 @@ $ hadolintw Dockerfile
 ![sample-output](https://user-images.githubusercontent.com/43891734/76677889-a3de9680-65d3-11ea-9575-8ba289bcb149.png)
 
 ## Installation
+
+On OS X, the easiest way to install *hadolintw* is using [Homebrew](http://brew.sh/)
+
+```
+$ brew tap mperezi/tools
+$ brew install hadolint-wrapper
+```
+
+On other platforms, install *hadolintw* using pip
 
 ```
 $ pip install hadolintw
