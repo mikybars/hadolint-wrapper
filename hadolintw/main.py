@@ -70,7 +70,7 @@ def main(dockerfile, use_docker, color, hadolint_args):
             cmd = ["docker", "run", "--rm", "-i", "hadolint/hadolint"] + cmd
 
         input_bytes = '\n'.join(input_lines).encode()
-        process = subprocess.run(cmd, input=input_bytes, capture_output=True)
+        process = subprocess.run(cmd, input=input_bytes, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if len(process.stderr) > 0:
             print(process.stderr.decode(), file=sys.stderr)
