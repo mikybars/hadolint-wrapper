@@ -36,7 +36,7 @@ jobs:
         id: build_brew_package
         run: |
           scripts/create_brew_package.py ${{ steps.build_package.outputs.file }}
-          echo "::set-output name=file::$(ls dist/*-brew.tar.gz)"
+          echo "::set-output name=file::$(basename $(ls dist/*-brew.tar.gz))"
 
       - name: Create release
         id: create_release
