@@ -60,6 +60,16 @@ On other platforms, install *hadolintw* using pip
 $ pip install hadolintw
 ```
 
+### Run from sources
+
+If you happen to clone this repo and want to give it a try from the source code, the following command will do the job:
+
+```
+just run DOCKERFILE
+```
+
+Please note that in such case you will need some tools installed in your machine, namely [just](https://just.systems/) and [Poetry](https://python-poetry.org/).
+
 ## Usage
 
 ```
