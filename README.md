@@ -1,4 +1,5 @@
-[![Publish](https://github.com/mperezi/hadolint-wrapper/workflows/Publish/badge.svg)](https://github.com/mperezi/hadolint-wrapper/actions?query=workflow%3APublish)
+[![PyPI version](https://badge.fury.io/py/hadolintw.svg)](https://badge.fury.io/py/hadolintw)
+
 # hadolint-wrapper 
 
 ## What is hadolint?
@@ -40,7 +41,7 @@ Dockerfile:9 DL3025 Use arguments JSON notation for CMD and ENTRYPOINT arguments
 ### With hadolint wrapper
 
 ```bash
-$ hadolintw Dockerfile
+hadolintw Dockerfile
 ```
 
 ![sample-output](https://user-images.githubusercontent.com/43891734/76677889-a3de9680-65d3-11ea-9575-8ba289bcb149.png)
@@ -49,22 +50,21 @@ $ hadolintw Dockerfile
 
 On OS X, the easiest way to install *hadolintw* is using [Homebrew](http://brew.sh/)
 
-```
-$ brew tap mperezi/tools
-$ brew install hadolint-wrapper
+```bash
+brew install mikybars/tools/hadolint-wrapper
 ```
 
 On other platforms, install *hadolintw* using pip
 
-```
-$ pip install hadolintw
+```bash
+pip install hadolintw
 ```
 
 ### Run from sources
 
 If you happen to clone this repo and want to give it a try from the source code, the following command will do the job:
 
-```
+```bash
 just run DOCKERFILE
 ```
 
@@ -86,9 +86,9 @@ Options:
 
 Set up as a wrapper:
 
-```
-$ alias hadolint=hadolintw
-$ hadolint Dockerfile --ignore DL3020
+```bash
+alias hadolint=hadolintw
+hadolint Dockerfile --ignore DL3020
 # Please note that all hadolint options must come AFTER the Dockerfile
 ```
 
@@ -102,16 +102,16 @@ No problem.
 
 By default the wrapper can detect if the output is being written to a tty or a pipe or a file, enabling or disabling the color codes accordingly (`—color auto` is the default setting). However you can always turn this feature on or off regardless of the type of output destination:
 
-```
-$ hadolintw --color never Dockerfile
+```bash
+hadolintw --color never Dockerfile
 ```
 
 ### In our team we have a `hadolint.yml` with some rules defined for our project. Can we still use it with the hadolint wrapper?
 
 Sure.
 
-```
-$ hadolintw Dockerfile --config hadolint.yml
+```bash
+hadolintw Dockerfile --config hadolint.yml
 ```
 
 ### The hadolint program is not available where my build is going to run but at least I have access to a Docker environment. Can I still run hadolint?
