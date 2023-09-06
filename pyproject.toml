@@ -2,10 +2,10 @@
 name = "hadolintw"
 version = "1.2.1"
 description = "Pretty output for hadolint"
-authors = ["mperezi <mperezibars@gmail.com>"]
+authors = ["Miguel Ibars <mperezibars@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/mperezi/hadolint-wrapper"
+repository = "https://github.com/mikybars/hadolint-wrapper"
 
 [tool.poetry.dependencies]
 python = "^3.6.0"
