@@ -3,6 +3,9 @@
   "features": {
     "ghcr.io/devcontainers-contrib/features/poetry:2": {},
     "ghcr.io/dhoeric/features/hadolint:1": {},
-    "ghcr.io/guiyomh/features/just:0": {}
+    "ghcr.io/guiyomh/features/just:0": {},
+    "ghcr.io/devcontainers/features/sshd:1": {
+        "version": "latest"
+    }
   }
 }
