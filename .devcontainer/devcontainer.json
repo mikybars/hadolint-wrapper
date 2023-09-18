@@ -1,4 +1,5 @@
 {
+  // https://github.com/devcontainers/images/tree/main/src/python
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
   "features": {
     "ghcr.io/devcontainers-contrib/features/poetry:2": {},
@@ -7,5 +8,10 @@
     "ghcr.io/devcontainers/features/sshd:1": {
         "version": "latest"
     }
-  }
+  },
+  "postCreateCommand": "bash ./.devcontainer/post-install.sh",
+  "mounts": [
+    // Re-use local Git configuration
+    "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
+  ]
 }
